@@ -1,0 +1,98 @@
+该表的定义语句：
+CREATE TABLE acquaintance(
+friend1 varchar(20) not null
+default Unknown1,
+friend2 varchar(20) not null
+default Unknown2,
+class varchar(20) not null
+default Unknown3
+)
+然后使用datafactory填充该表；
+
+1. 找出互不认识的人
+with h as (
+select friend1 as m from acquaintance
+union 
+select friend2 from acquaintance
+)
+select h1.m as m1, h2.m as m2
+from h as h1, h as h2
+where h1.m<>h2.m
+and not exists (select * from acquaintance where (friend1=h1.m and friend2=h2.m) or (friend2=h1.m and friend1=h2.m));
+2 找出只在一个类别里出现的人
+with t as(
+SELECT friend1 AS m, class FROM acquaintance
+UNION
+SELECT friend2, class FROM acquaintance
+)
+SELECT h1.m
+FROM h AS h1
+WHERE NOT EXISTS(SELECT * FROM t WHERE m=h1.m AND class<>h1.class);
+3 找出在所有类别里都有朋友的人
+with h as(
+SELECT friend1 AS m, class FROM acquaintance
+UNION
+SELECT friend1 ,class FROM acquaintance
+)
+SELECT m
+FROM h AS h1
+WHERE m=h1.m AND NOT EXISTS(SELECT * FROM h WHERE h.class<>h1.class);
+4 找出每个类别里面朋友最多的人
+with h as (
+select M,class,sum(cn) as cnt from 
+(select friend1 AS M,class,count(*) as cn from acquaintance group by friend1,class
+union all
+select friend2 AS M,class,count(*) as cn from acquaintance group by M,class)
+as h group by M,class)
+select * from h AS h1 where cnt=(select max(cnt) from h where h1.class=h.class)
+ORDER BY class;
+5 找出在同一类别里面通过朋友而结识的其他朋友
+with h as 
+(
+select friend1 AS M1, friend2 AS M2, class from acquaintance group by friend1,friend2,class
+union all
+select friend2 AS M1, friend1 AS M2, class from acquaintance group by M1,M2,class
+)
+select a1.friend1, a1.friend2, a1.class
+from acquaintance as a1
+where exists
+(select * from (
+select h.M2 from h where a1.friend1=h.M1 and a1.class=h.class
+) as fof1,
+(
+select h.M2 from h where a1.friend2=h.M1 and a1.class=h.class
+)as fof2
+where(fof1.M2=fof2.M2) and (fof1.M2<>friend2) and (fof2.M2<>friend1))
+ORDER BY friend1;
+6 找出这样的人，通过他而结识的朋友对最多
+with 
+h as 
+(
+select friend1,friend2
+from   acquaintance
+union all
+select friend2,friend1
+from   acquaintance
+),
+related as
+(
+select h1.friend1,
+       h1.friend2 as midman,
+       h2.friend2 
+from   h as h1
+       inner join h as h2
+         on h1.friend2 = h2.friend1
+)
+select midman,count(*) as rlt_index
+from (
+        select *
+        from   related as rlt
+        where  rlt.friend1 <> rlt.friend2
+     ) a group by midman		 
+ORDER BY rlt_index DESC;
+7 找出臭味相投的朋友，他们在所出现的所有类别里面都是朋友
+select friend1,friend2,class from acquaintance as h1
+where not exists (select * from acquaintance as h2
+where not exists(
+select * from acquaintance 
+where class=h2.class and ((friend1=h1.friend1 and friend2=h1.friend2) or (friend1=h1.friend2 and friend2=h1.friend1))));
