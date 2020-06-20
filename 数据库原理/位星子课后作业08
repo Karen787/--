@@ -1,0 +1,70 @@
+逻辑设计
+建库代码
+DROP TABLE Admin;;/*SkipError*/
+CREATE TABLE Admin(
+    管理员ID BIGINT NOT NULL   COMMENT 'admin_ID' ,
+    管理员名 VARCHAR(3072)    COMMENT 'admin_Name' ,
+    管理员密码 VARCHAR(3072)    COMMENT 'admin_Password' ,
+    PRIMARY KEY (管理员ID)
+) COMMENT = '管理员 ';;
+
+ALTER TABLE Admin COMMENT '管理员';;
+DROP TABLE User;;/*SkipError*/
+CREATE TABLE User(
+    用户ID BIGINT NOT NULL   COMMENT 'user_ID' ,
+    用户名 VARCHAR(3072)    COMMENT 'user_Name' ,
+    用户密码 VARCHAR(3072)    COMMENT 'user_Password' ,
+    PRIMARY KEY (用户ID)
+) COMMENT = '用户 ';;
+
+ALTER TABLE User COMMENT '用户';;
+DROP TABLE Article;;/*SkipError*/
+CREATE TABLE Article(
+    article_ID BIGINT NOT NULL   COMMENT '文章ID' ,
+    user_ID BIGINT    COMMENT '用户ID' ,
+    article_Name VARCHAR(3072)    COMMENT '文章名' ,
+    type_ID BIGINT    COMMENT '类ID' ,
+    view_Count BIGINT    COMMENT '浏览量' ,
+    PRIMARY KEY (article_ID)
+) COMMENT = '文章 ';;
+
+ALTER TABLE Article COMMENT '文章';;
+DROP TABLE Type;;/*SkipError*/
+CREATE TABLE Type(
+    type_ID BIGINT NOT NULL   COMMENT '类ID' ,
+    type_Name VARCHAR(3072)    COMMENT '类名' ,
+    article_ID BIGINT    COMMENT '文章ID' ,
+    PRIMARY KEY (type_ID)
+) COMMENT = '类 ';;
+
+ALTER TABLE Type COMMENT '类';;
+DROP TABLE Tag;;/*SkipError*/
+CREATE TABLE Tag(
+    tag_ID BIGINT NOT NULL   COMMENT '标签ID' ,
+    tag_Name VARCHAR(3072)    COMMENT '标签名' ,
+    article_ID BIGINT    COMMENT '文章ID' ,
+    PRIMARY KEY (tag_ID)
+) COMMENT = '标签 ';;
+
+ALTER TABLE Tag COMMENT '标签';;
+DROP TABLE Document;;/*SkipError*/
+CREATE TABLE Document(
+    doc_ID BIGINT NOT NULL   COMMENT '文件ID' ,
+    doc_Name VARCHAR(3072)    COMMENT '文件名' ,
+    user_ID BIGINT    COMMENT '用户ID' ,
+    doc_Type VARCHAR(3072)    COMMENT '文件类别' ,
+    PRIMARY KEY (doc_ID)
+) COMMENT = '文件素材 ';;
+
+ALTER TABLE Document COMMENT '文件素材';;
+DROP TABLE Comment;;/*SkipError*/
+CREATE TABLE Comment(
+    comment_ID BIGINT NOT NULL   COMMENT '评论ID' ,
+    article_ID BIGINT    COMMENT '文章ID' ,
+    comment_Content TEXT    COMMENT '评论内容' ,
+    user_ID BIGINT    COMMENT '用户ID' ,
+    reply_ID BIGINT    COMMENT '回复ID' ,
+    PRIMARY KEY (comment_ID)
+) COMMENT = '评论 ';;
+
+ALTER TABLE Comment COMMENT '评论';;
